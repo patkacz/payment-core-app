@@ -28,15 +28,15 @@ class Workflow() : Task() {
      */
     inline fun <reified ItemType : Task> getItem(): ItemType {
         val item = ItemType::class.java.getDeclaredConstructor().newInstance()
-        return workflowItems[jumpMap[item.taskName]!!] as ItemType
+        return workflowItems[jumpMap[item.taskName]!!] as ItemType //TODO: change !! to something safer
     }
 
     /**
      * Insert a task before a specific task.
      */
     inline fun <reified InsertItemType : Task, reified BeforeItemType : Task> insertBefore(): Workflow {
-        val task = BeforeItemType::class.java.getDeclaredConstructor().newInstance()
-        val pos = jumpMap[task.taskName]
+        val beforeTaskName = BeforeItemType::class.simpleName?: "Unknown?"
+        val pos = jumpMap[beforeTaskName]
             ?: throw IllegalArgumentException("Inserting task before non-existent task")
         return insert<InsertItemType>(pos)
     }
@@ -45,8 +45,8 @@ class Workflow() : Task() {
      * Insert a task after a specific task.
      */
     inline fun <reified InsertItemType : Task, reified AfterItemType : Task> insertAfter(): Workflow {
-        val task = AfterItemType::class.java.getDeclaredConstructor().newInstance()
-        val pos = jumpMap[task.taskName]
+        val afterTaskName = AfterItemType::class.simpleName?: "Unknown?"
+        val pos = jumpMap[afterTaskName]
             ?: throw IllegalArgumentException("Inserting task after non-existent task")
         return insert<InsertItemType>(pos + 1)
     }
