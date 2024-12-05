@@ -8,6 +8,7 @@ import com.flatpay.pay_app.data.datastore.DataStore
 import com.flatpay.pay_app.data.models.AppModel
 import com.flatpay.pay_app.state.AppState
 import com.flatpay.log.AppLog
+import com.flatpay.pay_app.repositories.MyWorkflowRepository
 
 
 class AppViewModel(private val dataStore: DataStore) : ViewModel() {
@@ -39,6 +40,8 @@ class AppViewModel(private val dataStore: DataStore) : ViewModel() {
 
     fun onMainButtonClicked() {
         AppLog.LOGI("button clicked")
+        val workflowRepository = MyWorkflowRepository()
+        workflowRepository.runWorkflow()
     }
 }
 
