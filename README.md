@@ -6,20 +6,26 @@ A modern Android payment terminal application written in Kotlin, designed to han
 
 The application follows Clean Architecture principles and MVVM pattern, with a clear separation of concerns:
 ```
-app/src/main/java/com/flatpay/payment_core_app/
+payment_core_app/
+├── apps/
+    ├── pay_app/src/main/java/com/flatpay/pay_app/
+        ├── data/              # Data layer: implementations, repositories
+             ├── models/        # Data models
+             ├── datastore/     # Repository implementations
+        ├── state              # Managing the overall state of an application
+        ├── viewmodels/        # ViewModels
+        └── ui/                # Activities and Fragments
+             ├── main/          # MainActivity, Screens
+             └── settings/      # Settings
 ├── common/
     └── workflows      # Transaction workflows logic
-├── data/              # Data layer: implementations, repositories
-│   ├── models/        # Data models
-│   ├── datastore/     # Repository implementations
-│   ├── host/          # Host communication implementations
-│   ├── mock/          # Mock implementations for testing
-│   └── config/        # Configuration classes
-├── state              # Managing the overall state of an application
-├── viewmodels/        # ViewModels
-└── ui/                # Activities and Fragments
-    ├── main/          # MainActivity, Screens
-    └── settings/      # Settings
+├── design/
+├── host/          # Host communication implementations
+├── mock/          # Mock implementations for testing
+├── config/        # Configuration classes
+└── log/           # Logger 
+
+
 
 ```
 ### Key Components
