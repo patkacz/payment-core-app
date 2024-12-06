@@ -1,5 +1,6 @@
 package com.flatpay.common.workflows
 
+import com.flatpay.common.database.WorkflowContext
 import com.flatpay.log.AppLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -90,7 +91,7 @@ class Workflow : Task() {
      * Executes the workflow asynchronously.
      */
     override suspend fun execute(
-        context: DBContext,
+        context: WorkflowContext,
         dependencies: Dependencies
     ): TaskResult = withContext(Dispatchers.Default) {
         val currentWorkflow = taskName
@@ -119,9 +120,9 @@ class Workflow : Task() {
     /**
      * Execute task, handle pre and post hoooks
      */
-    private suspend fun executeTask(context: DBContext, dependencies: Dependencies) {
+    private suspend fun executeTask(context: WorkflowContext, dependencies: Dependencies) {
         val currentTask = workflowItems[currentTaskIndex]
-        AppLog.LOGI("Execute task $(currentTask.taskName)")
+        AppLog.LOGI("Execute task ${currentTask.taskName}")
 
         // Execute pre-hooks if any
         if (currentTask.hasPreHooks()) {
@@ -133,12 +134,12 @@ class Workflow : Task() {
                 return
             }
             if (hookResult.isJumping) {
-                AppLog.LOGI("*** Pre hook jump to: $(hookResult.getNextItem())")
+                AppLog.LOGI("*** Pre hook jump to: ${hookResult.nextWorkflowItem}")
                 if (!setNextProcessingItem(hookResult.nextWorkflowItem ?: "")) {
                     lastTaskResult = TaskResult(TaskResult.ResultCodes.CANCEL)
                     return
                 }
-                AppLog.LOGI("*** Pre hook jump to: $(workflowItems[currentTaskIndex].taskName)")
+                AppLog.LOGI("*** Pre hook jump to: ${workflowItems[currentTaskIndex].taskName}")
                 return
             }
         }
@@ -148,7 +149,7 @@ class Workflow : Task() {
 
         // Handle jump if needed
         if (lastTaskResult.isJumping) {
-            AppLog.LOGI("*** $(currentTask.taskName) jump to: $(lastTaskResult.getNextItem())")
+            AppLog.LOGI("*** ${currentTask.taskName} jump to: ${lastTaskResult.nextWorkflowItem}")
             if (!setNextProcessingItem(lastTaskResult.nextWorkflowItem ?: "")) {
                 lastTaskResult = TaskResult(TaskResult.ResultCodes.CANCEL)
                 return
@@ -165,12 +166,12 @@ class Workflow : Task() {
                 return
             }
             if (hookResult.isJumping) {
-                AppLog.LOGI("*** Post hook jump to: $hookResult.getNextItem()")
+                AppLog.LOGI("*** Post hook jump to: ${hookResult.nextWorkflowItem}")
                 if (!setNextProcessingItem(hookResult.nextWorkflowItem ?: "Unknown!")) {
                     lastTaskResult = TaskResult(TaskResult.ResultCodes.CANCEL)
                     return
                 }
-                AppLog.LOGI("*** Post hook jump to: $(workflowItems[currentTaskIndex].taskName)")
+                AppLog.LOGI("*** Post hook jump to: ${workflowItems[currentTaskIndex].taskName}")
                 return
             }
         }
@@ -182,7 +183,7 @@ class Workflow : Task() {
      * Execute hooks for the task
      */
     private suspend fun executeHooks(
-        context: DBContext,
+        context: WorkflowContext,
         dependencies: Dependencies,
         hooksList: List<Task>?
     ): TaskResult = coroutineScope {
@@ -207,7 +208,7 @@ class Workflow : Task() {
             currentTaskIndex = pos
             true
         } else {
-            AppLog.LOGI("Invalid attempt to jump to: $(nextItemName)")
+            AppLog.LOGI("Invalid attempt to jump to: ${nextItemName}")
             false
         }
     }

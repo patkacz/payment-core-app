@@ -10,19 +10,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.flatpay.pay_app.viewmodels.AppViewModel
 
 @Composable
 fun MainScreen(viewModel: AppViewModel) {
     // Observe the button click message from the ViewModel
+    val context = LocalContext.current // Obtain the current Context
 
     Box (
         modifier = Modifier.fillMaxSize(), // Make Box take the full size of the screen
         contentAlignment = Alignment.Center // Center the content within the Box
     ) {
             Button(
-                onClick = { viewModel.onMainButtonClicked() },
+                onClick = { viewModel.onMainButtonClicked(context) },
                 modifier = Modifier
                     .fillMaxWidth() // Make the button fill the width
                     .padding(horizontal = 16.dp) // Horizontal padding

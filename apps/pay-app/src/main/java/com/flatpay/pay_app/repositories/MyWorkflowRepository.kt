@@ -1,6 +1,7 @@
 package com.flatpay.pay_app.repositories
 
-import com.flatpay.common.workflows.DBContext
+import android.content.Context
+import com.flatpay.common.database.WorkflowContext
 import com.flatpay.common.workflows.Dependencies
 import com.flatpay.common.workflows.Workflow
 import com.flatpay.log.AppLog
@@ -14,10 +15,10 @@ import kotlinx.coroutines.runBlocking
 
 
 class MyWorkflowRepository {
-    fun runWorkflow() {
+    fun runWorkflow(context: Context) {
         AppLog.LOGI("MyWorkflow start")
         runBlocking {
-            val context = DBContext()  // Replace with actual context
+            val workflowContext = WorkflowContext(context)  // Replace with actual context
             val dependencies = Dependencies()  // Replace with actual dependencies
 
             val workflow = Workflow()
@@ -31,7 +32,7 @@ class MyWorkflowRepository {
             workflow.getItem<MyTask>().addPostHook<MyTaskPostHook>()
 
             val result =
-                workflow.execute(context, dependencies)
+                workflow.execute(workflowContext, dependencies)
 
             AppLog.LOGI("MyWorkflow completed with result: $result")
         }
