@@ -17,3 +17,4 @@ dependencyResolutionManagement {
 rootProject.name = "payment-core-app"
 include(":apps:pay-app")
 include(":log")
+include(":common")
