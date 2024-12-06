@@ -14,7 +14,7 @@ import com.flatpay.pay_app.tasks.MyTaskPreHook
 import kotlinx.coroutines.runBlocking
 
 
-class MyWorkflowRepository {
+interface MyWorkflowRepository {
     fun runWorkflow(context: Context) {
         AppLog.LOGI("MyWorkflow start")
         runBlocking {

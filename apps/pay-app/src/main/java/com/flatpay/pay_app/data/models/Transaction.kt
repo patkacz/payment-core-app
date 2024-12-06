@@ -1,5 +1,5 @@
 package com.flatpay.pay_app.data.models
 
-class Transaction {
-    val counter = 0
-}
+data class Transaction (
+    val counter: Int = 0
+)

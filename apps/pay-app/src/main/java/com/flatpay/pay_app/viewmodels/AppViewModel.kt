@@ -9,9 +9,11 @@ import com.flatpay.pay_app.data.datastore.DataStore
 import com.flatpay.pay_app.data.models.AppModel
 import com.flatpay.pay_app.repositories.MyWorkflowRepository
 import com.flatpay.pay_app.state.AppState
+import com.flatpay.log.AppLog
+import com.flatpay.pay_app.repositories.MyWorkflowRepository
 
 
-class AppViewModel(private val dataStore: DataStore) : ViewModel() {
+class AppViewModel(private val dataStore: DataStore) : BaseViewModel(), MyWorkflowRepository {
     private val _appState = MutableLiveData<AppState>()
     val appState: LiveData<AppState> get() = _appState
 
@@ -40,8 +42,11 @@ class AppViewModel(private val dataStore: DataStore) : ViewModel() {
 
     fun onMainButtonClicked(context: Context) {
         AppLog.LOGI("button clicked")
-        val workflowRepository = MyWorkflowRepository()
-        workflowRepository.runWorkflow(context)
+        runWorkflow(context)
+    }
+
+    override fun propertyChange(p0: PropertyChangeEvent?) {
+        TODO("Not yet implemented")
     }
 }
 
