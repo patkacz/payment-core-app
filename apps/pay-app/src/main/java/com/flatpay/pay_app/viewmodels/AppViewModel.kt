@@ -1,17 +1,16 @@
 package com.flatpay.pay_app.viewmodels
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+
+import com.flatpay.common.view.models.BaseViewModel
 import com.flatpay.pay_app.data.datastore.DataStore
-import com.flatpay.pay_app.data.models.AppModel
 import com.flatpay.pay_app.state.AppState
 import com.flatpay.log.AppLog
 import com.flatpay.pay_app.repositories.MyWorkflowRepository
+import java.beans.PropertyChangeEvent
 
-
-class AppViewModel(private val dataStore: DataStore) : ViewModel() {
+class AppViewModel(private val dataStore: DataStore) : BaseViewModel(), MyWorkflowRepository {
     private val _appState = MutableLiveData<AppState>()
     val appState: LiveData<AppState> get() = _appState
 
@@ -20,7 +19,6 @@ class AppViewModel(private val dataStore: DataStore) : ViewModel() {
         //Live data binding
         _appState.value = AppState.Loading
         fetchData()
-
     }
 
     // Method to fetch data and update appState accordingly
@@ -32,7 +30,7 @@ class AppViewModel(private val dataStore: DataStore) : ViewModel() {
             _appState.value = AppState.Success(data)
             // Update AppModel if needed
             // For example:
-            val appModel = AppModel(isLoading = false, successData = data)
+            //val appModel = AppModel(isLoading = false, successData = data)
         } catch (e: Exception) {
             _appState.value = AppState.Error(e.message ?: "An error occurred")
         }
@@ -40,8 +38,11 @@ class AppViewModel(private val dataStore: DataStore) : ViewModel() {
 
     fun onMainButtonClicked() {
         AppLog.LOGI("button clicked")
-        val workflowRepository = MyWorkflowRepository()
-        workflowRepository.runWorkflow()
+        runWorkflow()
+    }
+
+    override fun propertyChange(p0: PropertyChangeEvent?) {
+        TODO("Not yet implemented")
     }
 }
 
