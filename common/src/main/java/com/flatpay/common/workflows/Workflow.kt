@@ -47,7 +47,7 @@ class Workflow : Task() {
      * Retrieve a specific task from the workflow.
      */
     inline fun <reified T : Task> getItem(): T {
-        val taskName = T::class.simpleName?: "Unknown?"
+        val taskName = T::class.simpleName ?: "Unknown?"
         return workflowItems[jumpMap[taskName]!!] as T //TODO: change !! to something safer
     }
 
@@ -55,7 +55,7 @@ class Workflow : Task() {
      * Insert a task before a specific task.
      */
     inline fun <reified InsertItem : Task, reified BeforeItem : Task> insertBefore(): Workflow {
-        val beforeTaskName = BeforeItem::class.simpleName?: "Unknown?"
+        val beforeTaskName = BeforeItem::class.simpleName ?: "Unknown?"
         val pos = jumpMap[beforeTaskName]
             ?: throw IllegalArgumentException("Inserting task before non-existent task")
         return insert<InsertItem>(pos)
@@ -65,7 +65,7 @@ class Workflow : Task() {
      * Insert a task after a specific task.
      */
     inline fun <reified InsertItem : Task, reified AfterItem : Task> insertAfter(): Workflow {
-        val afterTaskName = AfterItem::class.simpleName?: "Unknown?"
+        val afterTaskName = AfterItem::class.simpleName ?: "Unknown?"
         val pos = jumpMap[afterTaskName]
             ?: throw IllegalArgumentException("Inserting task after non-existent task")
         return insert<InsertItem>(pos + 1)
@@ -148,8 +148,11 @@ class Workflow : Task() {
 
         // Handle jump if needed
         if (lastTaskResult.isJumping) {
-            setNextProcessingItem(lastTaskResult.nextWorkflowItem ?: "")
-            return
+            AppLog.LOGI("*** $(currentTask.taskName) jump to: $(lastTaskResult.getNextItem())")
+            if (!setNextProcessingItem(lastTaskResult.nextWorkflowItem ?: "")) {
+                lastTaskResult = TaskResult(TaskResult.ResultCodes.CANCEL)
+                return
+            }
         }
 
         // Execute post-hooks if any
@@ -204,6 +207,7 @@ class Workflow : Task() {
             currentTaskIndex = pos
             true
         } else {
+            AppLog.LOGI("Invalid attempt to jump to: $(nextItemName)")
             false
         }
     }

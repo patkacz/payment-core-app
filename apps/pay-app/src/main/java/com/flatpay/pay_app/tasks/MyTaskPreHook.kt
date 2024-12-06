@@ -11,7 +11,7 @@ class MyTaskPreHook : Task() {
         context: DBContext,
         dependencies: Dependencies
     ): TaskResult {
-        AppLog.LOGI( "MyTaskPreHook: execute()")
+        AppLog.LOGI("MyTaskPreHook: execute()")
         return TaskResult()
     }
 }

@@ -11,7 +11,7 @@ class MyTaskInsert : Task() {
         context: DBContext,
         dependencies: Dependencies
     ): TaskResult {
-        AppLog.LOGI( "MyTaskInsert: execute()")
+        AppLog.LOGI("MyTaskInsert: execute()")
         return TaskResult()
     }
 }

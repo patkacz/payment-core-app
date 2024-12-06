@@ -11,7 +11,7 @@ class MyOtherTask : Task() {
         context: DBContext,
         dependencies: Dependencies
     ): TaskResult {
-        AppLog.LOGI( "MyOtherTask: execute()")
+        AppLog.LOGI("MyOtherTask: execute()")
         return TaskResult(TaskResult.ResultCodes.OK)
     }
 }

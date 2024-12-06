@@ -4,7 +4,6 @@ import com.flatpay.common.MockLogger
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 
 class TestTask1 : Task() {
@@ -132,10 +131,30 @@ class WorkflowTest {
     fun `insertBefore adds task in correct position`() = runTest {
         workflow.addItem<TestTask1>()
         workflow.addItem<TestTask2>()
-        workflow.insertBefore<TestTask1, TestTask2>()
+        workflow.addItem<TestTask4>()
+        workflow.insertBefore<TestTask3, TestTask4>()
 
-        assertEquals(3, workflow.workflowItems.size)
-        assertTrue(workflow.workflowItems[1] is TestTask1)
+        val context = DBContext()
+        val dependencies = Dependencies()
+        val result = workflow.execute(context, dependencies)
+
+        assertEquals(TaskResult.ResultCodes.OK, result.retCode)
+        assertEquals(listOf("TestTask1", "TestTask2", "TestTask3", "TestTask4"), taskExecutionList)
+    }
+
+    @Test
+    fun `insertAfter adds task in correct position`() = runTest {
+        workflow.addItem<TestTask1>()
+        workflow.addItem<TestTask2>()
+        workflow.addItem<TestTask3>()
+        workflow.insertAfter<TestTask4, TestTask3>()
+
+        val context = DBContext()
+        val dependencies = Dependencies()
+        val result = workflow.execute(context, dependencies)
+
+        assertEquals(TaskResult.ResultCodes.OK, result.retCode)
+        assertEquals(listOf("TestTask1", "TestTask2", "TestTask3", "TestTask4"), taskExecutionList)
     }
 
     @Test
@@ -278,7 +297,6 @@ class WorkflowTest {
         )
     }
 
-    @Ignore("Not working properly for now")
     @Test
     fun `workflow handles invalid jump targets gracefully`() = runTest {
         workflow.addItem<TestTask1>()

@@ -11,7 +11,7 @@ class MyTaskPostHook : Task() {
         context: DBContext,
         dependencies: Dependencies
     ): TaskResult {
-        AppLog.LOGI( "MyTaskPostHook: execute()")
+        AppLog.LOGI("MyTaskPostHook: execute()")
         return TaskResult()
     }
 }
