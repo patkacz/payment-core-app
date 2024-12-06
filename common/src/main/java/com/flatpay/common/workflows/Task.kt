@@ -1,5 +1,6 @@
 package com.flatpay.common.workflows
 
+import com.flatpay.common.database.WorkflowContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -95,7 +96,7 @@ abstract class Task {
      * @return The result of the task execution
      */
     abstract suspend fun execute(
-        context: DBContext,
+        context: WorkflowContext,
         dependencies: Dependencies
     ): TaskResult
 
@@ -108,7 +109,7 @@ abstract class Task {
      * @return The result of this task execution
      */
     suspend fun runTask(
-        context: DBContext,
+        context: WorkflowContext,
         dependencies: Dependencies,
         lastTaskResult: TaskResult
     ): TaskResult {

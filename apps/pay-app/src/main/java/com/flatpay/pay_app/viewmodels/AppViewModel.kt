@@ -1,14 +1,14 @@
 package com.flatpay.pay_app.viewmodels
 
-import androidx.compose.runtime.mutableStateOf
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.flatpay.log.AppLog
 import com.flatpay.pay_app.data.datastore.DataStore
 import com.flatpay.pay_app.data.models.AppModel
-import com.flatpay.pay_app.state.AppState
-import com.flatpay.log.AppLog
 import com.flatpay.pay_app.repositories.MyWorkflowRepository
+import com.flatpay.pay_app.state.AppState
 
 
 class AppViewModel(private val dataStore: DataStore) : ViewModel() {
@@ -38,10 +38,10 @@ class AppViewModel(private val dataStore: DataStore) : ViewModel() {
         }
     }
 
-    fun onMainButtonClicked() {
+    fun onMainButtonClicked(context: Context) {
         AppLog.LOGI("button clicked")
         val workflowRepository = MyWorkflowRepository()
-        workflowRepository.runWorkflow()
+        workflowRepository.runWorkflow(context)
     }
 }
 

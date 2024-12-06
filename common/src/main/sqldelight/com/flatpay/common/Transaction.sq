@@ -1,0 +1,30 @@
+import java.math.BigDecimal;
+import com.flatpay.common.database.TransactionStatus;
+import com.flatpay.common.database.PaymentTechnology;
+
+CREATE TABLE txn (
+    uuid TEXT NOT NULL PRIMARY KEY ,
+    amount INTEGER,
+    currencyCode TEXT,
+    currencyNumber TEXT,
+    createdAt TEXT,
+    stan TEXT,
+    transactionStatus TEXT AS TransactionStatus,
+    paymentTechnology TEXT AS PaymentTechnology,
+    paymentMethodDetails TEXT
+);
+
+selectAll:
+SELECT * FROM txn;
+
+get:
+SELECT * FROM txn WHERE uuid = ?;
+
+insertOrReplace:
+INSERT OR REPLACE INTO txn VALUES ?;
+
+insert:
+INSERT INTO txn VALUES ?;
+
+delete:
+DELETE FROM txn WHERE uuid = ?;
