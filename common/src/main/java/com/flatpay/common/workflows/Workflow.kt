@@ -6,18 +6,38 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 
-class Workflow() : Task() {
+/**
+ * Represents a workflow that executes a sequence of tasks.
+ *
+ * A workflow manages the execution order of tasks, including their pre-hooks and post-hooks,
+ * and supports dynamic jumping between tasks based on task results.
+ */
+class Workflow : Task() {
+    /**
+     * Index of the currently executing task.
+     */
+    private var currentTaskIndex: Int = 0
 
-    private var nextItem: Int = 0
+    /**
+     * Result of the last executed task.
+     */
     private var lastTaskResult: TaskResult = TaskResult(TaskResult.ResultCodes.OK)
+
+    /**
+     * List of tasks in this workflow.
+     */
     val workflowItems: MutableList<Task> = mutableListOf()
+
+    /**
+     * Mapping of task names to their positions in the workflow.
+     */
     val jumpMap: MutableMap<String, Int> = mutableMapOf()
 
     /**
      * Add a task to the workflow.
      */
-    suspend inline fun <reified ItemType : Task> addItem(): Workflow {
-        val task = ItemType::class.java.getDeclaredConstructor().newInstance()
+    inline fun <reified T : Task> addItem(): Workflow {
+        val task = T::class.java.getDeclaredConstructor().newInstance()
         workflowItems.add(task)
         jumpMap[task.taskName] = workflowItems.size - 1
         return this
@@ -26,36 +46,36 @@ class Workflow() : Task() {
     /**
      * Retrieve a specific task from the workflow.
      */
-    inline fun <reified ItemType : Task> getItem(): ItemType {
-        val item = ItemType::class.java.getDeclaredConstructor().newInstance()
-        return workflowItems[jumpMap[item.taskName]!!] as ItemType //TODO: change !! to something safer
+    inline fun <reified T : Task> getItem(): T {
+        val taskName = T::class.simpleName?: "Unknown?"
+        return workflowItems[jumpMap[taskName]!!] as T //TODO: change !! to something safer
     }
 
     /**
      * Insert a task before a specific task.
      */
-    inline fun <reified InsertItemType : Task, reified BeforeItemType : Task> insertBefore(): Workflow {
-        val beforeTaskName = BeforeItemType::class.simpleName?: "Unknown?"
+    inline fun <reified InsertItem : Task, reified BeforeItem : Task> insertBefore(): Workflow {
+        val beforeTaskName = BeforeItem::class.simpleName?: "Unknown?"
         val pos = jumpMap[beforeTaskName]
             ?: throw IllegalArgumentException("Inserting task before non-existent task")
-        return insert<InsertItemType>(pos)
+        return insert<InsertItem>(pos)
     }
 
     /**
      * Insert a task after a specific task.
      */
-    inline fun <reified InsertItemType : Task, reified AfterItemType : Task> insertAfter(): Workflow {
-        val afterTaskName = AfterItemType::class.simpleName?: "Unknown?"
+    inline fun <reified InsertItem : Task, reified AfterItem : Task> insertAfter(): Workflow {
+        val afterTaskName = AfterItem::class.simpleName?: "Unknown?"
         val pos = jumpMap[afterTaskName]
             ?: throw IllegalArgumentException("Inserting task after non-existent task")
-        return insert<InsertItemType>(pos + 1)
+        return insert<InsertItem>(pos + 1)
     }
 
     /**
      * Insert a task at a specific position.
      */
-    inline fun <reified ItemType : Task> insert(pos: Int): Workflow {
-        val task = ItemType::class.java.getDeclaredConstructor().newInstance()
+    inline fun <reified T : Task> insert(pos: Int): Workflow {
+        val task = T::class.java.getDeclaredConstructor().newInstance()
         workflowItems.add(pos, task)
         jumpMap.forEach { (key, value) ->
             if (value >= pos) {
@@ -78,8 +98,8 @@ class Workflow() : Task() {
 
         var workflowResult = TaskResult(TaskResult.ResultCodes.OK)
 
-        while (nextItem < workflowItems.size) {
-            executeNextTask(context, dependencies)
+        while (currentTaskIndex < workflowItems.size) {
+            executeTask(context, dependencies)
             workflowResult = this@Workflow.lastTaskResult
 
             if (workflowResult.retCode == TaskResult.ResultCodes.ERROR) {
@@ -92,67 +112,71 @@ class Workflow() : Task() {
             }
         }
 
-        nextItem = 0
+        currentTaskIndex = 0
         workflowResult
     }
 
-    private suspend fun executeNextTask(context: DBContext, dependencies: Dependencies) {
-        val currentTask = workflowItems[nextItem].taskName
-        AppLog.LOGI("Execute task $currentTask")
+    /**
+     * Execute task, handle pre and post hoooks
+     */
+    private suspend fun executeTask(context: DBContext, dependencies: Dependencies) {
+        val currentTask = workflowItems[currentTaskIndex]
+        AppLog.LOGI("Execute task $(currentTask.taskName)")
 
-        if (workflowItems[nextItem].hasPreHooks()) {
+        // Execute pre-hooks if any
+        if (currentTask.hasPreHooks()) {
             AppLog.LOGI("Execute pre hooks")
-            val hookResult = executeHooks(context, dependencies, workflowItems[nextItem].preHooks)
+            val hookResult = executeHooks(context, dependencies, currentTask.preHooks)
             if (hookResult == TaskResult(TaskResult.ResultCodes.CANCEL)) {
                 AppLog.LOGI("Pre hook return CANCEL")
                 lastTaskResult = hookResult
                 return
             }
-            if (hookResult.isJumping()) {
-                AppLog.LOGI("*** Pre hook jump to: $hookResult.getNextItem()")
+            if (hookResult.isJumping) {
+                AppLog.LOGI("*** Pre hook jump to: $(hookResult.getNextItem())")
                 if (!setNextProcessingItem(hookResult.nextWorkflowItem ?: "")) {
                     lastTaskResult = TaskResult(TaskResult.ResultCodes.CANCEL)
                     return
                 }
-                AppLog.LOGI("*** Pre hook jump to: $nextItem")
+                AppLog.LOGI("*** Pre hook jump to: $(workflowItems[currentTaskIndex].taskName)")
                 return
             }
         }
 
-        val task = workflowItems[nextItem]
+        // Execute main task
+        lastTaskResult = currentTask.runTask(context, dependencies, lastTaskResult)
 
-        lastTaskResult = task.runTask(context, dependencies, lastTaskResult)
-
-        if (lastTaskResult.isJumping()) {
+        // Handle jump if needed
+        if (lastTaskResult.isJumping) {
             setNextProcessingItem(lastTaskResult.nextWorkflowItem ?: "")
             return
         }
 
-
-        if (workflowItems[nextItem].hasPostHooks()) {
+        // Execute post-hooks if any
+        if (currentTask.hasPostHooks()) {
             AppLog.LOGI("Execute post hooks")
-            val hookResult = executeHooks(context, dependencies, workflowItems[nextItem].postHooks)
+            val hookResult = executeHooks(context, dependencies, currentTask.postHooks)
             if (hookResult == TaskResult(TaskResult.ResultCodes.CANCEL)) {
                 AppLog.LOGI("Post hook return CANCEL")
                 lastTaskResult = hookResult
                 return
             }
-            if (hookResult.isJumping()) {
+            if (hookResult.isJumping) {
                 AppLog.LOGI("*** Post hook jump to: $hookResult.getNextItem()")
                 if (!setNextProcessingItem(hookResult.nextWorkflowItem ?: "Unknown!")) {
                     lastTaskResult = TaskResult(TaskResult.ResultCodes.CANCEL)
                     return
                 }
-                AppLog.LOGI("*** Post hook jump to: $nextItem")
+                AppLog.LOGI("*** Post hook jump to: $(workflowItems[currentTaskIndex].taskName)")
                 return
             }
         }
 
-        nextItem++
+        currentTaskIndex++
     }
 
     /**
-     * Execute hooks for the workflow asynchronously.
+     * Execute hooks for the task
      */
     private suspend fun executeHooks(
         context: DBContext,
@@ -164,7 +188,7 @@ class Workflow() : Task() {
                 hook.runTask(context, dependencies, lastTaskResult)
             }.await()
 
-            if (result.isJumping() || result.retCode == TaskResult.ResultCodes.CANCEL) {
+            if (result.isJumping || result.retCode == TaskResult.ResultCodes.CANCEL) {
                 return@coroutineScope result
             }
         }
@@ -177,7 +201,7 @@ class Workflow() : Task() {
     private fun setNextProcessingItem(nextItemName: String): Boolean {
         val pos = jumpMap[nextItemName]
         return if (pos != null) {
-            nextItem = pos
+            currentTaskIndex = pos
             true
         } else {
             false

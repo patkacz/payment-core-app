@@ -7,19 +7,19 @@ class TaskResultTest {
     @Test
     fun `isJumping returns true when nextWorkflowItem is set and retCode is OK`() {
         val result = TaskResult("NextTask", TaskResult.ResultCodes.OK)
-        assertTrue(result.isJumping())
+        assertTrue(result.isJumping)
     }
 
     @Test
     fun `isJumping returns false when nextWorkflowItem is null`() {
         val result = TaskResult(null, TaskResult.ResultCodes.OK)
-        assertFalse(result.isJumping())
+        assertFalse(result.isJumping)
     }
 
     @Test
     fun `isJumping returns false when retCode is not OK`() {
         val result = TaskResult("NextTask", TaskResult.ResultCodes.ERROR)
-        assertFalse(result.isJumping())
+        assertFalse(result.isJumping)
     }
 
     @Test
