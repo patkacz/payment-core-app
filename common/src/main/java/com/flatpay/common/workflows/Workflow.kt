@@ -120,7 +120,6 @@ class Workflow() : Task() {
         }
 
         val task = workflowItems[nextItem]
-        task.setExecutedFromWorkflow()
 
         lastTaskResult = task.runTask(context, dependencies, lastTaskResult)
 
@@ -158,7 +157,7 @@ class Workflow() : Task() {
     private suspend fun executeHooks(
         context: DBContext,
         dependencies: Dependencies,
-        hooksList: MutableList<Task>?
+        hooksList: List<Task>?
     ): TaskResult = coroutineScope {
         hooksList?.forEach { hook ->
             val result = async {

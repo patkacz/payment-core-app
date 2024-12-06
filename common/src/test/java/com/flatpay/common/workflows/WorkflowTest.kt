@@ -50,7 +50,7 @@ class PostHookTask : Task() {
     }
 }
 
-// Additional test task for cancellation testing
+// Additional test tasks for cancellation testing
 class CancellingPreHookTask : Task() {
     override suspend fun execute(context: DBContext, dependencies: Dependencies): TaskResult {
         WorkflowTest.taskExecutionList.add(taskName)
@@ -90,7 +90,7 @@ class InvalidJumpTask : Task() {
     }
 }
 
-// Hook that jumps to a specific task
+// Hook that jumps to TestTask4
 class JumpingPreHookTask : Task() {
     override suspend fun execute(context: DBContext, dependencies: Dependencies): TaskResult {
         WorkflowTest.taskExecutionList.add(taskName)
@@ -102,7 +102,6 @@ class WorkflowTest {
     private lateinit var workflow: Workflow
 
     companion object {
-        // Make it accessible to test tasks
         var taskExecutionList: MutableList<String> = mutableListOf()
     }
 
@@ -153,6 +152,7 @@ class WorkflowTest {
         assertEquals(TaskResult.ResultCodes.OK, result.retCode)
         assertEquals(listOf("TestTask1", "TestTask2", "TestTask3", "TestTask4"), taskExecutionList)
     }
+
     @Test
     fun `pre-hooks and post-hooks are executed in the correct order`() = runTest {
         // Add main tasks
@@ -165,7 +165,7 @@ class WorkflowTest {
         workflow.getItem<TestTask1>().addPreHook<PreHookTask>()
         workflow.getItem<TestTask1>().addPostHook<PostHookTask>()
         workflow.getItem<TestTask3>().addPostHook<PostHookTask>()
-        workflow.getItem<TestTask4>().addPreHook<PreHookTask>()
+        workflow.getItem<TestTask4>().addPreHookInstance(PreHookTask())
 
         val context = DBContext()
         val dependencies = Dependencies()
@@ -174,10 +174,10 @@ class WorkflowTest {
         assertEquals(TaskResult.ResultCodes.OK, result.retCode)
         assertEquals(
             listOf(
-                "PreHookTask",  // First pre-hook executes
-                "TestTask1",    // Then main task
-                "PostHookTask", // Then post-hook
-                "TestTask2",     // Then next task
+                "PreHookTask",
+                "TestTask1",
+                "PostHookTask",
+                "TestTask2",
                 "TestTask3",
                 "PostHookTask",
                 "PreHookTask",
@@ -324,4 +324,3 @@ class WorkflowTest {
         )
     }
 }
-
