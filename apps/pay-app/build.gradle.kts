@@ -1,11 +1,12 @@
 plugins {
     id("com.android.application")
     id("kotlin-android")
+    alias(libs.plugins.compose.compiler)
 }
 
 android {
     namespace = "com.flatpay.pay_app"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.flatpay.pay_app"
@@ -30,17 +31,14 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
     }
     packaging {
         resources {
@@ -62,11 +60,8 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
-    implementation("androidx.activity:activity-compose:1.8.2")
-    implementation("androidx.compose.ui:ui:1.0.5") // Compose UI
-    implementation("androidx.compose.material:material:1.0.5") // Material Design
-    implementation("androidx.activity:activity-compose:1.4.0") // Activity Compose
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.4.1") // ViewModel for Compose
-
+    implementation(libs.ui) // Compose UI
+    implementation(libs.androidx.material) // Material Design
+    implementation(libs.androidx.activity.compose) // Activity Compose
+    implementation(libs.androidx.lifecycle.viewmodel.compose) // ViewModel for Compose
 }
-

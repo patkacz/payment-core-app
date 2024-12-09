@@ -5,11 +5,10 @@ plugins {
 
 android {
     namespace = "com.flatpay.log"
-    compileSdk = 34 // Set the compile SDK version
+    compileSdk = 35 // Set the compile SDK version
 
     defaultConfig {
         minSdk = 27 // Minimum SDK version
-        targetSdk = 34 // Target SDK version
     }
 
     buildTypes {
@@ -23,12 +22,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8 // Set for Java compatibility
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17 // Set for Java compatibility
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = "1.8" // Set to Java 8 compatibility for Kotlin
+        jvmTarget = "17"
     }
 }
 
