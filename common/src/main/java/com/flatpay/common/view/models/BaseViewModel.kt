@@ -6,5 +6,7 @@ import java.beans.PropertyChangeListener
 
 abstract class BaseViewModel : ViewModel(), PropertyChangeListener
 {
+    abstract fun navigateToNextScreen()
+    abstract fun hideProcessingScreen()
 
 }

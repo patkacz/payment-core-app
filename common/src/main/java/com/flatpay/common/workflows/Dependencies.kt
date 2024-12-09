@@ -4,7 +4,6 @@ import com.flatpay.common.protocol.IHostProtocolHandler
 import com.flatpay.common.emvEngines.IPaymentEngineHandler
 import com.flatpay.common.view.models.BaseViewModel
 import com.flatpay.log.AppLog
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
 
 enum class DependencyKey {
@@ -20,10 +19,12 @@ class Dependencies {
     // database handler
     private val database = AtomicReference<IDatabase?>()
 
+
     // Need o have here multiple view models?
     // Consider here ModelFactory
     // View Model to operate on GUI
-    private var currentViewModel by AtomicPropertyDelegate<BaseViewModel>(dependencies, DependencyKey.CURRENT_VIEW_MODEL)
+    var currentViewModel by AtomicPropertyDelegate<BaseViewModel>(dependencies, DependencyKey.CURRENT_VIEW_MODEL)
+    //lateinit var currentViewModel: BaseViewModel
 
     // Host protocol handler, this allow to build different messages
     // it depend on host type
@@ -34,6 +35,12 @@ class Dependencies {
     fun retrieveHostProtocolHandler() = hostProtocolHandler
     fun retrievePaymentEngineHandler() = paymentEngineHandler
     fun retrieveCurrentViewModel() = currentViewModel
+
+    //override fun onCreate(savedInstanceState: Bundle?) {
+        //super.onCreate(savedInstanceState)
+        //currentViewModel = ViewModelProvider(requireActivity(), AppViewModelFactory(DataStore())).get(AppViewModel::class.java)
+        // appViewModel = ViewModelProvider(this, AppViewModelFactory(dataStore)).get(AppViewModel::class.java)
+    //}
 
     fun initDependencies() {
         AppLog.LOGI("Dependencies init")
