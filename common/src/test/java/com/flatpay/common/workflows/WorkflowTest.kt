@@ -1,6 +1,7 @@
 package com.flatpay.common.workflows
 
 import com.flatpay.common.MockLogger
+import com.flatpay.common.core.model.Dependencies
 import com.flatpay.common.database.WorkflowContext
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest

@@ -2,6 +2,7 @@ package com.flatpay.common.workflows
 
 import com.flatpay.common.database.WorkflowContext
 import io.mockk.mockk
+import com.flatpay.common.core.model.Dependencies
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Test

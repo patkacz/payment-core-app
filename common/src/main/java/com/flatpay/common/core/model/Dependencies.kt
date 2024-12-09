@@ -1,11 +1,11 @@
-package com.flatpay.common.workflows
+package com.flatpay.common.core.model
 
-import com.flatpay.common.protocol.IHostProtocolHandler
+import com.flatpay.common.host.IHostProtocolController
 import com.flatpay.common.emvEngines.IPaymentEngineHandler
-import com.flatpay.common.view.models.BaseViewModel
+import com.flatpay.common.core.base.BaseViewModel
+import com.flatpay.common.workflows.AtomicPropertyDelegate
 import com.flatpay.log.AppLog
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicReference
+
 
 enum class DependencyKey {
     DATABASE,
@@ -18,16 +18,17 @@ class Dependencies {
     private val dependencies = mutableMapOf<DependencyKey, Any>()  // ENUM instead of string ?
     //private val dependencies = ConcurrentHashMap<DependencyKey, Any>()
     // database handler
-    private val database = AtomicReference<IDatabase?>()
+
 
     // Need o have here multiple view models?
     // Consider here ModelFactory
     // View Model to operate on GUI
-    private var currentViewModel by AtomicPropertyDelegate<BaseViewModel>(dependencies, DependencyKey.CURRENT_VIEW_MODEL)
+    var currentViewModel by AtomicPropertyDelegate<BaseViewModel>(dependencies, DependencyKey.CURRENT_VIEW_MODEL)
+    //lateinit var currentViewModel: BaseViewModel
 
     // Host protocol handler, this allow to build different messages
     // it depend on host type
-    private var hostProtocolHandler by AtomicPropertyDelegate<IHostProtocolHandler>(dependencies, DependencyKey.HOST_PROTOCOL_HANDLER)
+    private var hostProtocolHandler by AtomicPropertyDelegate<IHostProtocolController>(dependencies, DependencyKey.HOST_PROTOCOL_HANDLER)
     // Host protocol handler, this allow to build different messages
     // it depend on host type
     private var paymentEngineHandler by AtomicPropertyDelegate<IPaymentEngineHandler>(dependencies, DependencyKey.PAYMENT_ENGINE_HANDLER)
@@ -35,22 +36,11 @@ class Dependencies {
     fun retrievePaymentEngineHandler() = paymentEngineHandler
     fun retrieveCurrentViewModel() = currentViewModel
 
-    fun initDependencies() {
-        AppLog.LOGI("Dependencies init")
-    }
-
-    fun setDatabase(db: IDatabase?) {
-        database.set(db)
-        dependencies[DependencyKey.DATABASE] = database
-    }
-
-    fun getDatabase(): IDatabase {
-        return database.get() ?: throw IllegalStateException("Database is null")
-    }
-
-    fun hasDatabase(): Boolean {
-        return database.get() != null
-    }
+    //override fun onCreate(savedInstanceState: Bundle?) {
+        //super.onCreate(savedInstanceState)
+        //currentViewModel = ViewModelProvider(requireActivity(), AppViewModelFactory(DataStore())).get(AppViewModel::class.java)
+        // appViewModel = ViewModelProvider(this, AppViewModelFactory(dataStore)).get(AppViewModel::class.java)
+    //}
 
     fun hasDependency(key: DependencyKey): Boolean = dependencies.containsKey(key)
 

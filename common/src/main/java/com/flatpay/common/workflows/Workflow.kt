@@ -1,6 +1,7 @@
 package com.flatpay.common.workflows
 
 import com.flatpay.common.database.WorkflowContext
+import com.flatpay.common.core.model.Dependencies
 import com.flatpay.log.AppLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async

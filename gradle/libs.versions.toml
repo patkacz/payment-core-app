@@ -19,6 +19,10 @@ uiToolingPreviewAndroid = "1.7.5"
 kotlinxCoroutinesTest = "1.9.0"
 mockk = "1.13.13"
 sqlDelight = "2.0.2"
+storage = "1.5.0"
+navigationRuntimeKtx = "2.8.4"
+navigationCompose = "2.8.4"
+coil-kt = "2.4.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -48,6 +52,10 @@ kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-cor
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 sqldelight-android-driver = { module = "app.cash.sqldelight:android-driver", version.ref = "sqlDelight" }
 ui = { module = "androidx.compose.ui:ui", version.ref = "ui" }
+coil = { module = "io.coil-kt:coil-compose", version.ref = "coil-kt" }
+androidx-storage = { group = "androidx.test.services", name = "storage", version.ref = "storage" }
+androidx-navigation-runtime-ktx = { group = "androidx.navigation", name = "navigation-runtime-ktx", version.ref = "navigationRuntimeKtx" }
+androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

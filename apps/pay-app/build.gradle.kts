@@ -50,19 +50,24 @@ android {
 
 dependencies {
     implementation(project(":log"))
+    implementation(project(":common"))
     implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.foundation.layout.android)
     implementation(libs.androidx.material3.android)
     implementation(libs.androidx.ui.tooling.preview.android)
-    implementation(project(":common"))
+    implementation(libs.androidx.storage)
+    implementation(libs.androidx.navigation.runtime.ktx)
+    implementation(libs.androidx.navigation.compose)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     implementation(libs.ui) // Compose UI
+    implementation(libs.coil)
     implementation(libs.androidx.material) // Material Design
     implementation(libs.androidx.activity.compose) // Activity Compose
     implementation(libs.androidx.lifecycle.viewmodel.compose) // ViewModel for Compose
     implementation(libs.kotlin.reflect)
+
 }
