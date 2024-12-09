@@ -1,6 +1,7 @@
 package com.flatpay.common.database
 
 import android.content.Context
+import com.flatpay.common.TransactionQueries
 import com.flatpay.common.Txn
 import com.flatpay.log.AppLog
 import java.time.LocalDateTime
@@ -8,16 +9,21 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.random.Random
+import kotlin.reflect.KClass
 
-data class ObjectWithMethod(
-    var data: AtomicReference<Any>,
-    val query: AtomicReference<Any>
+// Define the wrapper for the object and its manipulator
+data class ObjectEntry(
+    val instance: AtomicReference<Any>,
+    val manipulator: AtomicReference<Any>
 )
 
-class WorkflowContext(val context: Context, val txnUUID: String? = null) {
-    val database = DatabaseModule(context).database
-    val registryMap: MutableMap<String, ObjectWithMethod> = mutableMapOf()
+class WorkflowContext(val context: Context, private val txnUUID: String? = null) {
+    private val database = DatabaseModule(context).database
 
+    // Define a registry that maps KClass to a wrapper containing the object and its manipulation class
+    val registryMap: MutableMap<KClass<*>, ObjectEntry> = mutableMapOf()
+
+    val controllerManager = ControllerManager()
 
     private fun generateUUIDv7(): String {
         val timestamp = System.currentTimeMillis()
@@ -71,49 +77,49 @@ class WorkflowContext(val context: Context, val txnUUID: String? = null) {
     }
 
     // Generic register method
-    fun <T : Any> register(instance: T, query: Any) {
-        val className = instance::class.simpleName ?: "Unknown?"
-        AppLog.LOGI("DBContext: className = ${className}, instance = $instance")
-
-        registryMap[className] =
-            ObjectWithMethod(data = AtomicReference(instance), query = AtomicReference(query))
+    private inline fun <reified T : Any, reified M : Any> register(instance: T, manipulator: M) {
+        AppLog.LOGI("WorkflowContext: Register class = ${T::class.simpleName}, query = ${M::class.simpleName}")
+        registryMap[T::class] = ObjectEntry(AtomicReference(instance), AtomicReference(manipulator))
     }
 
     // Function to retrieve a object by type
-    //@Suppress("UNCHECKED_CAST")
     inline fun <reified T : Any> get(): T? {
-        val className = T::class.simpleName ?: "Unknown?"
-        return registryMap[className]?.data?.get() as? T
+        return registryMap[T::class]?.instance?.get() as? T
     }
 
-    inline fun <reified T : Any> set(instance: T): T? {
-        val className = T::class.simpleName ?: "Unknown?"
-
-        var container = registryMap[className]
+    inline fun <reified T : Any> set(data: T): T? {
+        val container = registryMap[T::class]
         if (container != null) {
-            container.data.set(instance)
-            registryMap[className] = container
-            return container.data.get() as T
+            container.instance.set(data)
+            registryMap[T::class] = container
+            return container.instance.get() as T
         }
 
         return null
     }
 
     // Function to save a object by type
-    //@Suppress("UNCHECKED_CAST")
     inline fun <reified T : Any> save() {
-        val className = T::class.simpleName ?: "Unknown?"
-        val obj = registryMap[className]?.data?.get() as? Txn
+        val instance = registryMap[T::class]?.instance?.get() as? T
+        val manipulator = registryMap[T::class]?.manipulator?.get() as? T
 
-        if (obj != null) {
-            database.transactionQueries.insertOrReplace(obj)
+        if (instance != null && manipulator != null) {
+            if (instance is Txn)
+                (manipulator as TransactionQueries).insertOrReplace(instance as Txn)
         }
     }
 
     // Function to retrieve a query object by type
-    //@Suppress("UNCHECKED_CAST")
-    inline fun <reified T : Any> query(): Any? {
-        val className = T::class.simpleName ?: "Unknown?"
-        return registryMap[className]?.query?.get()
+    inline fun <reified T : Any, reified M : Any> query(): M? {
+        return registryMap[T::class]?.manipulator?.get() as? M
+    }
+
+    // Generic register method
+    inline fun <reified T> registerController(instance: T) {
+        controllerManager.register<T>(instance)
+    }
+
+    inline fun <reified T> getController(): T? {
+        return controllerManager.getController<T>()
     }
 }

@@ -96,8 +96,7 @@ abstract class Task {
      * @return The result of the task execution
      */
     abstract suspend fun execute(
-        context: WorkflowContext,
-        dependencies: Dependencies
+        context: WorkflowContext, dependencies: Dependencies
     ): TaskResult
 
     /**
@@ -105,17 +104,13 @@ abstract class Task {
      *
      * @param context The database context for the task
      * @param dependencies Any dependencies required by the task
-     * @param lastTaskResult The result from the previous task execution
      * @return The result of this task execution
      */
     suspend fun runTask(
-        context: WorkflowContext,
-        dependencies: Dependencies,
-        lastTaskResult: TaskResult
+        context: WorkflowContext, dependencies: Dependencies
     ): TaskResult {
         return withContext(Dispatchers.Default) {
             execute(context, dependencies)
         }
-
     }
 }

@@ -1,19 +1,27 @@
 package com.flatpay.common.workflows
 
+import com.flatpay.common.database.WorkflowContext
+import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 import org.junit.Test
 
 class TaskTest {
     class TestTask : Task() {
-        override suspend fun execute(context: DBContext, dependencies: Dependencies): TaskResult {
-            return TaskResult(TaskResult.ResultCodes.OK)
+        override suspend fun execute(
+            context: WorkflowContext,
+            dependencies: Dependencies
+        ): TaskResult {
+            return TaskResult.ResultCode(TaskStatus.OK)
         }
     }
 
     class TestHook : Task() {
-        override suspend fun execute(context: DBContext, dependencies: Dependencies): TaskResult {
-            return TaskResult(TaskResult.ResultCodes.OK)
+        override suspend fun execute(
+            context: WorkflowContext,
+            dependencies: Dependencies
+        ): TaskResult {
+            return TaskResult.ResultCode(TaskStatus.OK)
         }
     }
 
@@ -46,11 +54,10 @@ class TaskTest {
     @Test
     fun `runTask executes task and returns result`() = runTest {
         val task = TestTask()
-        val context = DBContext()
+        val mockContext = mockk<WorkflowContext>(relaxed = true) {}
         val dependencies = Dependencies()
-        val lastTaskResult = TaskResult(TaskResult.ResultCodes.OK)
 
-        val result = task.runTask(context, dependencies, lastTaskResult)
-        assertEquals(TaskResult.ResultCodes.OK, result.retCode)
+        val result = task.runTask(mockContext, dependencies)
+        assertEquals(TaskResult.ResultCode(TaskStatus.OK), result)
     }
 }

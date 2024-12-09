@@ -46,6 +46,7 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     testImplementation(libs.kotlinx.coroutines.test)
     implementation(libs.sqldelight.android.driver)
+    implementation(kotlin("reflect"))
 }
 
 sqldelight {

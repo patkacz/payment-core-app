@@ -1,11 +1,13 @@
 package com.flatpay.pay_app.tasks
 
+import com.flatpay.common.TransactionQueries
 import com.flatpay.common.Txn
 import com.flatpay.common.database.WorkflowContext
 import com.flatpay.common.database.TransactionStatus
 import com.flatpay.common.workflows.Dependencies
 import com.flatpay.common.workflows.Task
 import com.flatpay.common.workflows.TaskResult
+import com.flatpay.common.workflows.TaskStatus
 import com.flatpay.log.AppLog
 
 class MyTask : Task() {
@@ -22,13 +24,15 @@ class MyTask : Task() {
 
         txn = context.set<Txn>(txn?.copy(transactionStatus = TransactionStatus.APPROVED)!!)
 
-        //txn = context.database.transactionQueries.get(txn.id)
-        //val txn1 = context.query<Txn>().get(1L)
-
         AppLog.LOGI("MyTask 2: txnUUID = ${txn?.uuid}, txn.status = ${txn?.transactionStatus}")
+
+        //txn = context.database.transactionQueries.get(txn.id)
+        val allTxn = context.query<Txn, TransactionQueries>()?.selectAll()?.executeAsList()
+
+        AppLog.LOGI("MyTask 3: allTxn: $allTxn")
 
         context.save<Txn>()
 
-        return TaskResult()
+        return TaskResult.ResultCode(TaskStatus.OK)
     }
 }

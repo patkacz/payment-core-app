@@ -1,8 +1,8 @@
 package com.flatpay.common
 
 import com.flatpay.log.AppLog
-import io.mockk.mockkObject
 import io.mockk.justRun
+import io.mockk.mockkObject
 
 object MockLogger {
     fun setup() {

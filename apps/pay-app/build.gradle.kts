@@ -64,4 +64,5 @@ dependencies {
     implementation(libs.androidx.material) // Material Design
     implementation(libs.androidx.activity.compose) // Activity Compose
     implementation(libs.androidx.lifecycle.viewmodel.compose) // ViewModel for Compose
+    implementation(libs.kotlin.reflect)
 }

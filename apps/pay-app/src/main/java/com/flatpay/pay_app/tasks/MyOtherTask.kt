@@ -4,6 +4,7 @@ import com.flatpay.common.database.WorkflowContext
 import com.flatpay.common.workflows.Dependencies
 import com.flatpay.common.workflows.Task
 import com.flatpay.common.workflows.TaskResult
+import com.flatpay.common.workflows.TaskStatus
 import com.flatpay.log.AppLog
 
 class MyOtherTask : Task() {
@@ -12,6 +13,6 @@ class MyOtherTask : Task() {
         dependencies: Dependencies
     ): TaskResult {
         AppLog.LOGI("MyOtherTask: execute()")
-        return TaskResult(TaskResult.ResultCodes.OK)
+        return TaskResult.ResultCode(TaskStatus.OK)
     }
 }
