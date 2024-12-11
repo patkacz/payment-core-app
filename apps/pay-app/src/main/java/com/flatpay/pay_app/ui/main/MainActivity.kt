@@ -9,11 +9,10 @@ import androidx.navigation.compose.rememberNavController
 import com.flatpay.pay_app.data.datastore.DataStore
 import com.flatpay.pay_app.ui.sale.SaleViewModel
 import com.flatpay.pay_app.navigation.NaviationManager
-import com.flatpay.pay_app.navigation.NavigationViewModel
+import com.flatpay.common.navigation.NavigationModel
 import com.flatpay.pay_app.viewmodels.AppViewModel
 import com.flatpay.log.AppLog
 import com.flatpay.pay_app.PaymentApplication
-
 
 
 class MainActivity : ComponentActivity() {
@@ -27,14 +26,22 @@ class MainActivity : ComponentActivity() {
         AppLog.LOGI("START MainActivity!")
         super.onCreate(savedInstanceState)
 
-        val dependencies = (application as PaymentApplication).dependencies
-        val navigationViewModel = NavigationViewModel((application as PaymentApplication))
-        val factory = AppViewModelFactory(dependencies)
+        val app = application as PaymentApplication
+
+        val dependencies = app.dependencies
+        val navigationModel = NavigationModel()
+        val workflowContext = app.workflowContext
+        val factory = AppViewModelFactory(dependencies, workflowContext)
         appViewModel = ViewModelProvider(this, factory)[AppViewModel::class.java]
 
+        workflowContext.registerObject(navigationModel)
+        //navigationModel.observeNavigation()
+        //workflowContext.registerObject()
+        //workflowContext.registerController(navigationModel)
+
         //setupNavigation()
-  //      observeViewModel()
-    //    registerEventHandlers()
+        //observeViewModel()
+        //registerEventHandlers()
 
         enableEdgeToEdge()
         setContent {
@@ -42,38 +49,9 @@ class MainActivity : ComponentActivity() {
             NaviationManager(
                 navController = navController,
                 viewModel = appViewModel,
-                navigationViewModel = navigationViewModel
+                navigationViewModel = navigationModel
             )
         }
-/*
-        // Observe navigation commands
-        appViewModel.navigationEvent.observe(this, Observer { command ->
-            AppLog.LOGI("OBSERVERD EVENT!")
-            when (command) {
-                AppViewModel.NavigationCommand.NextScreen -> {
-                    navController.navigate(command) // Navigate to the next screen
-                    appViewModel.onNavigationHandled() // Reset navigation command
-                }
-                null -> {
-                    // No action needed as event is handled
-                }
-            }
-
-        })
-*/
-
-    }
-
-    private fun registerEventHandlers() {
-        TODO("Not yet implemented")
-    }
-
-    private fun observeViewModel() {
-        TODO("Not yet implemented")
-    }
-
-    private fun setupNavigation() {
-        TODO("Not yet implemented")
     }
 
     override fun onDestroy() {

@@ -122,4 +122,10 @@ class WorkflowContext(val context: Context, private val txnUUID: String? = null)
     inline fun <reified T> getController(): T? {
         return controllerManager.getController<T>()
     }
+
+    // Add a register method for objects without manipulators
+    inline fun <reified T : Any> registerObject(instance: T) {
+        AppLog.LOGI("WorkflowContext: Register class = ${T::class.simpleName}")
+        registryMap[T::class] = ObjectEntry(AtomicReference(instance), AtomicReference(Any()))
+    }
 }

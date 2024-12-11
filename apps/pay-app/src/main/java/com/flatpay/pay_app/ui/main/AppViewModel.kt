@@ -1,23 +1,25 @@
 package com.flatpay.pay_app.viewmodels
 
-import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-
 import com.flatpay.common.core.base.BaseViewModel
+import com.flatpay.common.database.WorkflowContext
+
 import com.flatpay.common.core.model.Dependencies
 import com.flatpay.pay_app.data.datastore.DataStore
 import com.flatpay.pay_app.state.AppState
 import com.flatpay.log.AppLog
+import com.flatpay.pay_app.PaymentApplication
 import com.flatpay.pay_app.repositories.WorkflowRepository
 import java.beans.PropertyChangeEvent
 
 class AppViewModel(
-    private val dependencies: Dependencies
+    private val dependencies: Dependencies, override val context: WorkflowContext
 ) : BaseViewModel() {
     private val _appState = MutableLiveData<AppState>()
     private val _workflowRepository = WorkflowRepository()
     private val dataStore =  DataStore()
+    private val navigationModel = PaymentApplication.getInstance().navigationModel
     val appState: LiveData<AppState> get() = _appState
 
     init {
@@ -44,7 +46,9 @@ class AppViewModel(
         }
     }
 
-    fun onMainButtonClicked(context: Context) {
+
+
+    fun onMainButtonClicked(context: WorkflowContext) {
         AppLog.LOGI("button clicked")
         _workflowRepository.runWorkflow(context, dependencies)
     }

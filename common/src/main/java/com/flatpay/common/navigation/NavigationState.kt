@@ -1,14 +1,23 @@
-package com.flatpay.pay_app.navigation
+package com.flatpay.common.navigation
 
+import com.flatpay.common.screens.Screen
+import com.flatpay.log.AppLog
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class NavigationState {
+    companion object {
+        val instance: NavigationState by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+            NavigationState()
+        }
+    }
+
     private val _currentScreen = MutableStateFlow<Screen>(Screen.Main)
     val currentScreen: StateFlow<Screen> = _currentScreen.asStateFlow()
 
     fun navigateTo(screen: Screen) {
+        AppLog.LOGI("NavigationState: NavigateTo $screen")
         _currentScreen.value = screen
     }
 

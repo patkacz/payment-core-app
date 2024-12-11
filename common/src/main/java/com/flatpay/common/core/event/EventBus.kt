@@ -1,30 +1,52 @@
 package com.flatpay.common.core.event
 
+import com.flatpay.log.AppLog
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onEach
 import kotlin.reflect.KClass
 
 
 class EventBus {
-    private val eventChannel = Channel<AppEvent>(Channel.UNLIMITED)
-    private val events = mutableMapOf<String, MutableList<(Any) -> Unit>>()  //waiting events
+    private val eventChannel = Channel<AppEvent>(Channel.BUFFERED)
+    companion object {
+        val instance: EventBus by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+            EventBus()
+        }// by lazy(LazyThreadSafetyMode.SYNCHRONIZED)
+        val eventScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)  // Removed private
+    }
+    //val events = mutableMapOf<String, MutableList<(Any) -> Unit>>()  //waiting events
+
+    //fun getInstance
 
     fun initialize() {
-
+        AppLog.LOGI("initialize EVENT BUS")
     }
 
-    fun publish(eventName: String, data: Any) {
-        events[eventName]?.forEach { it(data) }
+    fun cleanup() {
+        eventScope.cancel() // Cancel scope when needed
     }
 
-    suspend fun post(event: AppEvent) {
-        eventChannel.send(event)
+    //fun publish(eventName: String, data: Any) {
+      //  events[eventName]?.forEach { it(data) }
+    //}
+
+    fun post(event: AppEvent) {
+        AppLog.LOGI("EventBus: About to post event: $event")
+        eventScope.launch(Dispatchers.Main.immediate) {
+            eventChannel.send(event)
+            AppLog.LOGI("EventBus: Event posted: $event")
+        }
     }
 
     // Wait for multiple event types with optional timeout and auto-cancel
     suspend fun <T : AppEvent> waitMultiple(
         eventTypes: Set<KClass<out T>>, timeoutMillis: Long = -1 // Default value for infinite wait
     ): List<T> {
+        AppLog.LOGI("EventBus: Waiting for events: $eventTypes")
         val collectedEvents = mutableListOf<T>()
         val filteredChannel = Channel<T>()
 
@@ -33,6 +55,7 @@ class EventBus {
                 if (timeoutMillis > 0) {
                     withTimeout(timeoutMillis) {
                         for (event in eventChannel) {
+                            AppLog.LOGI("EventBus: Received event in wait1: $event")
                             if (eventTypes.any { it.isInstance(event) }) {
                                 @Suppress("UNCHECKED_CAST") filteredChannel.send(event as T)
                             }
@@ -40,13 +63,15 @@ class EventBus {
                     }
                 } else {
                     for (event in eventChannel) {
+                        AppLog.LOGI("EventBus: Received event in wait2: $event")
                         if (eventTypes.any { it.isInstance(event) }) {
+                            AppLog.LOGI("EventBus: SENDING RESPONSE")
                             @Suppress("UNCHECKED_CAST") filteredChannel.send(event as T)
                         }
                     }
                 }
             } catch (e: TimeoutCancellationException) {
-                println("Waiting for events timed out after $timeoutMillis ms.")
+                AppLog.LOGE("Waiting for events timed out after $timeoutMillis ms.")
             } finally {
                 filteredChannel.close()
             }
@@ -98,5 +123,19 @@ class EventBus {
         }
     }
 
+    fun collectEvents(
+        eventTypes: Set<KClass<out AppEvent>>,
+        onEvent: suspend (AppEvent) -> Unit
+    ) = eventScope.launch(Dispatchers.Main.immediate) {
+        AppLog.LOGI("EventBus: Starting collection for: $eventTypes")
+        eventChannel.consumeAsFlow()
+            .collect { event ->
+                if (eventTypes.any { it.isInstance(event) }) {
+                    withContext(Dispatchers.Main) {
+                        onEvent(event)
+                    }
+                }
+            }
+    }
 
 }

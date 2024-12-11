@@ -1,4 +1,4 @@
-package com.flatpay.pay_app.navigation
+package com.flatpay.common.screens
 
 sealed class Screen(val route: String) {
     object Main : Screen("main")

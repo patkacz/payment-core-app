@@ -1,6 +1,5 @@
-package com.flatpay.common.workflows
+package com.flatpay.common.core.model
 
-import com.flatpay.common.core.model.DependencyKey
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 import java.util.concurrent.atomic.AtomicReference

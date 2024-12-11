@@ -21,7 +21,7 @@ import com.flatpay.pay_app.viewmodels.AppViewModel
 @Composable
 fun MainScreen(viewModel: AppViewModel, navController: NavController) {
     // Observe the button click message from the ViewModel
-    val context = LocalContext.current // Obtain the current Context
+    val context = viewModel.context
 
     Box(
         modifier = Modifier.fillMaxSize(), // Make Box take the full size of the screen

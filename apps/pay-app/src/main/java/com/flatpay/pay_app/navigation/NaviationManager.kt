@@ -5,7 +5,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.flatpay.common.core.base.BaseViewModel
+import com.flatpay.common.navigation.NavigationModel
+import com.flatpay.common.screens.Screen
 import com.flatpay.pay_app.ui.main.MainScreen
 import com.flatpay.pay_app.ui.screens.ProcessingScreen
 import com.flatpay.pay_app.ui.settings.viewmodels.SettingsScreen
@@ -15,7 +16,7 @@ import com.flatpay.pay_app.viewmodels.AppViewModel
 fun NaviationManager(
     navController: NavHostController,
     viewModel: AppViewModel,
-    navigationViewModel: NavigationViewModel
+    navigationViewModel: NavigationModel
 ) {
     // Observe navigation state
     LaunchedEffect(true) {
@@ -40,7 +41,7 @@ fun NaviationManager(
             SettingsScreen(viewModel, navController)
         }
         composable(Screen.Processing.route) {
-            //    ProcessingScreen(viewModel, navController)
+             ProcessingScreen(viewModel, navController)
         }
         // Add other screens...
     }

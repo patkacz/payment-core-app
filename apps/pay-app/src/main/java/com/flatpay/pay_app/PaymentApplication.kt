@@ -1,39 +1,76 @@
 package com.flatpay.pay_app
 
 import android.app.Application
-import androidx.lifecycle.ViewModelProvider
 import com.flatpay.common.core.event.EventBus
+import com.flatpay.common.database.WorkflowContext
 import com.flatpay.common.core.model.Dependencies
-import com.flatpay.pay_app.navigation.NavigationState
-import com.flatpay.pay_app.data.datastore.DataStore
+import com.flatpay.common.navigation.NavigationModel
 
 class PaymentApplication : Application() {
-    companion object {
-        lateinit var instance: PaymentApplication
-            private set
-    }
+    private val _dependencies by lazy { Dependencies() }
+    private val _workflowContext by lazy { WorkflowContext(applicationContext) }
 
-    lateinit var dependencies: Dependencies
-    lateinit var navigationState: NavigationState
-        private set
-    private lateinit var dataStore: DataStore
-    private lateinit var eventBus: EventBus
+    // NavigationModel needs the Application instance, so we can't use lazy here
+    private lateinit var _navigationModel: NavigationModel
+
+    // Public read-only access if needed
+    val dependencies: Dependencies get() = _dependencies
+    val workflowContext: WorkflowContext get() = _workflowContext
+    val eventBus: EventBus get() = EventBus.instance
+    val navigationModel: NavigationModel get() = _navigationModel
 
     override fun onCreate() {
         super.onCreate()
-        instance = this
-        navigationState = NavigationState()
-        dependencies = Dependencies()
-        eventBus = EventBus()   //Events, hardware and gui
+        try {
+            initializeApplication()
+        } catch (e: Exception) {
+            handleInitializationError(e)
+        }
+    }
+
+    private fun initializeApplication() {
+        initializeNavigation()
+        initializeEventBus()
         initializeDependencies()
+        initializeWorkflow()
+    }
+
+    private fun initializeNavigation() {
+        _navigationModel = NavigationModel()
+    }
+
+    private fun initializeEventBus() {
+        eventBus.initialize()
+
     }
 
     private fun initializeDependencies() {
-        eventBus.initialize()
+        // Initialize dependencies in specific order
+        dependencies.eventBus = eventBus
 
-        // Sdk.PaymentReader.initialize(this)
-        // DatabaseHandler.initialize(this)
     }
 
-    fun getEventBus(): EventBus = eventBus
+    private fun initializeWorkflow() {
+        // Initialize workflow specific components
+    }
+
+    private fun handleInitializationError(error: Exception) {
+        // Log error, show user feedback, etc.
+    }
+
+    companion object {
+        @Volatile
+        private var INSTANCE: PaymentApplication? = null
+
+        fun getInstance(): PaymentApplication =
+            INSTANCE ?: throw IllegalStateException("Application not initialized")
+
+    }
+
+    init {
+        if (INSTANCE != null) {
+            throw IllegalStateException("Multiple instances not allowed")
+        }
+        INSTANCE = this
+    }
 }

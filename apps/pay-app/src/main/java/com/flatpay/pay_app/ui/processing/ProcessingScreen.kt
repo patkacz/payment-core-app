@@ -7,11 +7,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.flatpay.common.core.base.BaseViewModel
 import com.flatpay.pay_app.R
 import com.flatpay.pay_app.ui.processing.ProcessingViewModel
 
 @Composable
-fun ProcessingScreen(myViewModel: ProcessingViewModel, navController: NavController) {
+fun ProcessingScreen(myViewModel: BaseViewModel, navController: NavController) {
 
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         AsyncImage(
